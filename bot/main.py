@@ -18,4 +18,8 @@ async def on_ready():
 async def play(ctx, url):
     await music.play_song(ctx, url)
 
+@bot.command(name="stop")
+async def stop(ctx):
+    await music.stop_song(ctx)
+
 bot.run(os.getenv("DISCORD_TOKEN"))
