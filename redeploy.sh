@@ -4,7 +4,7 @@ echo "🔄 Kodlar GitHub'dan çekiliyor..."
 git pull origin main
 
 echo "📄 Ortam dosyası kopyalanıyor..."
-cp .env.example .env
+#cp .env.example .env
 
 echo "🐳 Docker imajı yeniden oluşturuluyor..."
 docker build -t dmb .
