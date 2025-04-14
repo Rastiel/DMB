@@ -8,7 +8,11 @@ FFMPEG_OPTIONS = {
     'options': '-vn'
 }
 
-YDL_OPTIONS = {'format': 'bestaudio'}
+YDL_OPTIONS = {
+    'format': 'bestaudio',
+    'cookiefile': 'cookies.txt',  # Giriş yapılmış kullanıcı gibi davranmak için
+    'noplaylist': True
+}
 
 async def play_song(ctx, url):
     voice = ctx.voice_client
@@ -19,29 +23,32 @@ async def play_song(ctx, url):
             await channel.connect()
             voice = ctx.voice_client
         else:
-            await ctx.send("You must be in a voice channel to use this command.")
+            await ctx.send("❌ You must be in a voice channel to use this command.")
             return
 
     with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-        info = ydl.extract_info(url, download=False)
-        audio_url = info['url']
-        source = await discord.FFmpegOpusAudio.from_probe(audio_url, **FFMPEG_OPTIONS)
+        try:
+            info = ydl.extract_info(url, download=False)
+            audio_url = info['url']
+            source = await discord.FFmpegOpusAudio.from_probe(audio_url, **FFMPEG_OPTIONS)
 
-        def after_playing(error):
-            coro = voice.disconnect()
-            fut = asyncio.run_coroutine_threadsafe(coro, ctx.bot.loop)
-            try:
-                fut.result()
-            except:
-                pass
+            def after_playing(error):
+                coro = voice.disconnect()
+                fut = asyncio.run_coroutine_threadsafe(coro, ctx.bot.loop)
+                try:
+                    fut.result()
+                except:
+                    pass
 
-        voice.play(source, after=after_playing)
-        await ctx.send(f"🎶 Now playing: **{info['title']}**")
+            voice.play(source, after=after_playing)
+            await ctx.send(f"🎶 Now playing: **{info['title']}**")
+        except Exception as e:
+            await ctx.send(f"❌ Failed to play: {str(e)}")
 
 async def stop_song(ctx):
     voice = ctx.voice_client
     if voice and voice.is_connected():
         await voice.disconnect()
-        await ctx.send("🛑 Playback stopped and bot left the channel.")
+        await ctx.send("🛑 Playback stopped. Bot has left the channel.")
     else:
-        await ctx.send("❌ I'm not connected to any voice channel.")
+        await ctx.send("
