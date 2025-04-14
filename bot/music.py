@@ -1,3 +1,4 @@
+
 import discord
 from discord.ext import commands
 import yt_dlp
@@ -10,7 +11,7 @@ FFMPEG_OPTIONS = {
 
 YDL_OPTIONS = {
     'format': 'bestaudio',
-    'cookiefile': 'cookies.txt',  # Giriş yapılmış kullanıcı gibi davranmak için
+    'cookiefile': 'cookies.txt',
     'noplaylist': True
 }
 
@@ -51,4 +52,4 @@ async def stop_song(ctx):
         await voice.disconnect()
         await ctx.send("🛑 Playback stopped. Bot has left the channel.")
     else:
-        await ctx.send("
+        await ctx.send("❌ I'm not connected to any voice channel.")
