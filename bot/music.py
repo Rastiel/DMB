@@ -1,11 +1,8 @@
-# Müzik komutları burada
 import discord
 from discord.ext import commands
 import yt_dlp
-
 import asyncio
 
-# FFmpeg ayarları
 FFMPEG_OPTIONS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn'
@@ -29,5 +26,22 @@ async def play_song(ctx, url):
         info = ydl.extract_info(url, download=False)
         audio_url = info['url']
         source = await discord.FFmpegOpusAudio.from_probe(audio_url, **FFMPEG_OPTIONS)
-        voice.play(source)
+
+        def after_playing(error):
+            coro = voice.disconnect()
+            fut = asyncio.run_coroutine_threadsafe(coro, ctx.bot.loop)
+            try:
+                fut.result()
+            except:
+                pass
+
+        voice.play(source, after=after_playing)
         await ctx.send(f"🎶 Now playing: **{info['title']}**")
+
+async def stop_song(ctx):
+    voice = ctx.voice_client
+    if voice and voice.is_connected():
+        await voice.disconnect()
+        await ctx.send("🛑 Playback stopped and bot left the channel.")
+    else:
+        await ctx.send("❌ I'm not connected to any voice channel.")
